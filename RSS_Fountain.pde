@@ -8,6 +8,7 @@ List strings;
 
 String username = "YOUR GOOGLE USERNAME";
 String password = "YOUR GOOGLE PASSWORD";
+
 void setup() {
   PFont font;
   // http://www.1001freefonts.com/ComicBookCommando.php
@@ -16,16 +17,18 @@ void setup() {
   
   strings = new ArrayList();
   
-  String punctuation = "[.,;:!@#$%^&*() \\/<>=+-_'\"]";
+  String urls = "<[^<].*>";
+  Pattern punctuation = Pattern.compile("(\\p{Punct}|\\p{Space})+");
   grc = new GoogleReaderClient(username, password);
   RecentItemsFeed rif = grc.getRecentItemsFeed();
   Iterator rifi = rif.getItems().iterator();
   while(rifi.hasNext()){
     FeedItem fi = (FeedItem) rifi.next();
-    String summary = (String) ((fi.getSummary() == null) ? "" :
-                               fi.getSummary().get("content"));
-    strings.addAll(Arrays.asList(fi.getTitle().split(punctuation)));
-    strings.addAll(Arrays.asList(summary.split(punctuation)));
+    String content = (String) ((fi.getContent() == null) ? "" :
+                               fi.getContent().get("content"));
+    content = content.replaceAll(urls,"");
+    strings.addAll(Arrays.asList(punctuation.split(fi.getTitle())));
+    strings.addAll(Arrays.asList(punctuation.split(content)));
     println(fi.getTitle());
   }
   size(640, 360);
@@ -37,8 +40,13 @@ void setup() {
 void draw() {
   background(0);
   ps.run();
-  ps.addParticle((String)strings.get(int(random(strings.size()))));
-  ps.addParticle((String)strings.get(int(random(strings.size()))));
+  String s = (String)strings.get(int(random(strings.size())));
+  println(s);
+  ps.addParticle(s);
+  s = (String)strings.get(int(random(strings.size())));
+  println(s);
+  ps.addParticle(s);
+
 }
 
 
